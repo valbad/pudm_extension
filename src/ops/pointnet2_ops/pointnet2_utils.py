@@ -58,9 +58,8 @@ except ImportError:
     )
     _ext_headers = glob.glob(osp.join(_ext_src_root, "include", "*"))
 
-    # Let PyTorch auto-detect the GPU architecture instead of hardcoding
-    if "TORCH_CUDA_ARCH_LIST" not in os.environ:
-        os.environ["TORCH_CUDA_ARCH_LIST"] = ""  # empty = auto-detect
+    # Remove any pre-set arch list so PyTorch auto-detects from the current GPU
+    os.environ.pop("TORCH_CUDA_ARCH_LIST", None)
     _ext = load(
         "_ext",
         sources=_ext_sources,
