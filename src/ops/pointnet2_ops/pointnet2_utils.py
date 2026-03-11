@@ -4,7 +4,43 @@ import torch.nn.functional as F
 import warnings
 from torch.autograd import Function
 from typing import *
-from pytorch3d.ops import knn
+
+
+# ---------- Pure-PyTorch KNN (replaces pytorch3d.ops.knn) ----------
+class _KNN:
+    """Minimal drop-in replacement for pytorch3d.ops.knn using torch.cdist."""
+
+    @staticmethod
+    def knn_points(p1, p2, K=1, return_nn=False):
+        """
+        p1: (B, N1, 3)  p2: (B, N2, 3)
+        Returns: (dists, idx, nn)
+          dists: (B, N1, K)  squared distances
+          idx:   (B, N1, K)  indices into p2
+          nn:    (B, N1, K, 3) or None
+        """
+        dists_all = torch.cdist(p1, p2, p=2.0) ** 2  # squared L2
+        dists, idx = dists_all.topk(K, dim=-1, largest=False)
+        nn = None
+        if return_nn:
+            # gather neighbour positions from p2
+            idx_exp = idx.unsqueeze(-1).expand(-1, -1, -1, p2.shape[-1])
+            nn = p2.unsqueeze(1).expand(-1, p1.shape[1], -1, -1).gather(2, idx_exp)
+        return dists, idx, nn
+
+    @staticmethod
+    def knn_gather(x, idx):
+        """
+        x:   (B, N, C)
+        idx: (B, M, K)
+        Returns: (B, M, K, C)
+        """
+        B, N, C = x.shape
+        _, M, K = idx.shape
+        idx_exp = idx.unsqueeze(-1).expand(-1, -1, -1, C)
+        return x.unsqueeze(1).expand(-1, M, -1, -1).gather(2, idx_exp)
+
+knn = _KNN()
 
 try:
     import src.ops.pointnet2_ops._ext as _ext
