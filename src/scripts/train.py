@@ -18,7 +18,7 @@ from shutil import copyfile
 from src.data.dataset import get_dataloader
 from src.models.pointnet2_with_pcld_condition import PointNet2CloudCondition
 from src.generative import get_strategy
-from src.utils.config import load_config, print_config
+from src.utils.config import load_config, print_config, get_strategy_config
 from src.utils.misc import set_seed
 
 
@@ -162,7 +162,7 @@ if __name__ == "__main__":
     # Parse configs
     train_config = config["train_config"]
     pointnet_config = config["pointnet_config"]
-    diffusion_config = config["diffusion_config"]
+    strategy_config = get_strategy_config(config, args.strategy)
 
     if train_config['dataset'] == 'PU1K':
         trainset_config = config["pu1k_dataset_config"]
@@ -172,7 +172,7 @@ if __name__ == "__main__":
         raise ValueError(f"Dataset {train_config['dataset']} not supported")
 
     # Compute strategy-specific hyperparameters
-    hyperparams = strategy.compute_hyperparams(**diffusion_config)
+    hyperparams = strategy.compute_hyperparams(**strategy_config)
 
     if not args.model_path:
         args.model_path = f"exp_{args.dataset.lower()}/{args.dataset}/logs/checkpoint/"

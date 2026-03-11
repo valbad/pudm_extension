@@ -12,7 +12,7 @@ import time
 from src.models.pointnet2_with_pcld_condition import PointNet2CloudCondition
 from src.generative import get_strategy
 from src.generative.ddpm import DDPMStrategy
-from src.utils.config import load_config, print_config
+from src.utils.config import load_config, print_config, get_strategy_config
 from src.utils.misc import set_seed
 from src.utils.pc_utils import pc_normalize, numpy_to_pc
 
@@ -109,7 +109,8 @@ if __name__ == "__main__":
 
     config = load_config(args.config)
     strategy = get_strategy(args.strategy)
-    hyperparams = strategy.compute_hyperparams(**config["diffusion_config"])
+    strategy_config = get_strategy_config(config, args.strategy)
+    hyperparams = strategy.compute_hyperparams(**strategy_config)
 
     # Move to GPU
     for key in hyperparams:
@@ -129,10 +130,10 @@ if __name__ == "__main__":
             strategy=strategy,
             hyperparams=hyperparams,
             example_file=args.example_file,
-            print_every_n_steps=config["diffusion_config"]["T"] // 5,
+            print_every_n_steps=strategy_config["T"] // 5,
             scale=1,
             R=args.R,
-            T=config["diffusion_config"]["T"],
+            T=strategy_config["T"],
             step=args.step,
             save_dir=args.save_dir,
             gamma=args.gamma,

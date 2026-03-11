@@ -36,6 +36,21 @@ def load_config(config_path):
     return config
 
 
+def get_strategy_config(config, strategy_name):
+    """Return the config section for a given strategy.
+
+    Looks for '{strategy_name}_config' in the config dict.
+    Falls back to 'diffusion_config' for backward compatibility.
+    """
+    key = f"{strategy_name}_config"
+    if key in config:
+        return config[key]
+    if "diffusion_config" in config:
+        return config["diffusion_config"]
+    raise KeyError(f"No config section found for strategy '{strategy_name}'. "
+                   f"Expected key '{key}' in config.")
+
+
 def print_config(config):
     """Pretty-print a config dict."""
     printable = replace_list_with_string_in_a_dict(copy.deepcopy(config))

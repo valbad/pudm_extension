@@ -1,8 +1,12 @@
 {
-    "diffusion_config": {
+    "ddpm_config": {
         "T": 1000,
         "beta_0": 0.0001,
         "beta_T": 0.02
+    },
+    "flow_matching_config": {
+        "T": 1000,
+        "num_steps": 100
     },
     "pointnet_config": {
         "model_name": "pointnet",

@@ -13,7 +13,7 @@ from src.data.dataset import get_dataloader
 from src.models.pointnet2_with_pcld_condition import PointNet2CloudCondition
 from src.generative import get_strategy
 from src.scripts.eval import evaluate
-from src.utils.config import load_config, print_config
+from src.utils.config import load_config, print_config, get_strategy_config
 from src.utils.misc import set_seed
 
 
@@ -61,13 +61,13 @@ def main(
         testloader=testloader,
         strategy=strategy,
         hyperparams=hyperparams,
-        print_every_n_steps=diffusion_config["T"] // 5,
+        print_every_n_steps=strategy_config["T"] // 5,
         scale=dataset_config['scale'],
         compute_cd=True,
         return_all_metrics=True,
         R=R,
         npoints=dataset_config['npoints'],
-        T=diffusion_config["T"],
+        T=strategy_config["T"],
         step=step,
         save_dir=save_dir,
         gamma=gamma,
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     train_config = config["train_config"]
     pointnet_config = config["pointnet_config"]
-    diffusion_config = config["diffusion_config"]
+    strategy_config = get_strategy_config(config, args.strategy)
 
     if train_config['dataset'] == 'PU1K':
         dataset_config = config["pu1k_dataset_config"]
@@ -124,14 +124,14 @@ if __name__ == "__main__":
     else:
         raise ValueError(f"Dataset {train_config['dataset']} not supported")
 
-    hyperparams = strategy.compute_hyperparams(**diffusion_config)
+    hyperparams = strategy.compute_hyperparams(**strategy_config)
 
     with torch.no_grad():
         main(
             config_file=args.config,
             pointnet_config=pointnet_config,
             dataset_config=dataset_config,
-            diffusion_config=diffusion_config,
+            diffusion_config=strategy_config,
             strategy=strategy,
             hyperparams=hyperparams,
             batch_size=args.batch_size,

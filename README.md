@@ -72,10 +72,28 @@ python -m src.scripts.example_sample \
 
 ## Generative Strategies
 
-| Strategy | Method | Sampling | Key Idea |
-|----------|--------|----------|----------|
-| `ddpm` | Denoising Diffusion | T-step reverse + DDIM | Predict noise ε at each step |
-| `flow_matching` | Conditional Flow Matching | Euler ODE integration | Predict velocity v = z − x₀ |
+Each strategy has its own config section in the JSON files:
+
+```json
+{
+    "ddpm_config": {
+        "T": 1000,
+        "beta_0": 0.0001,
+        "beta_T": 0.02
+    },
+    "flow_matching_config": {
+        "T": 1000,
+        "num_steps": 100
+    }
+}
+```
+
+The correct section is selected automatically based on the `--strategy` flag.
+
+| Strategy | Method | Sampling | Config Key | Key Params |
+|----------|--------|----------|------------|------------|
+| `ddpm` | Denoising Diffusion | T-step reverse + DDIM | `ddpm_config` | `T`, `beta_0`, `beta_T` |
+| `flow_matching` | Conditional Flow Matching | Euler ODE integration | `flow_matching_config` | `T`, `num_steps` |
 
 Both strategies share the same PointNet2 backbone and condition encoder. The only difference is how noisy/interpolated samples are created during training and how denoising/integration proceeds during inference.
 
