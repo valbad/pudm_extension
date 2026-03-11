@@ -4,35 +4,48 @@ import torch
 from torch.autograd import Function
 import torch.nn as nn
 
+# Try to import the pre-compiled pointops_cuda extension.
+# If pip install -e . placed the .so outside sys.path, add the egg directory.
+import os as _os, sys as _sys, glob as _glob
+
+_pointops_root = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), ".."))
+# Add the egg install dir so `import pointops_cuda` can find the .so
+for _egg_dir in _glob.glob(_os.path.join(_pointops_root, "*.egg")):
+    if _egg_dir not in _sys.path:
+        _sys.path.insert(0, _egg_dir)
+# Also add the pointops root itself (editable install puts .so there)
+if _pointops_root not in _sys.path:
+    _sys.path.insert(0, _pointops_root)
+
 try:
     import pointops_cuda
 except ImportError:
     import warnings
-    import os
     from torch.utils.cpp_extension import load
-    warnings.warn("Unable to load pointops_cuda cpp extension.")
-    pointops_cuda_src = os.path.join(os.path.dirname(__file__), "../src")
+    warnings.warn("Unable to load pointops_cuda cpp extension. JIT compiling.")
+    _src = _os.path.join(_os.path.dirname(__file__), "../src")
+    _os.environ.pop("TORCH_CUDA_ARCH_LIST", None)
     pointops_cuda = load('pointops_cuda', [
-        pointops_cuda_src + '/pointops_api.cpp',
-        pointops_cuda_src + '/ballquery/ballquery_cuda.cpp',
-        pointops_cuda_src + '/ballquery/ballquery_cuda_kernel.cu',
-        pointops_cuda_src + '/knnquery/knnquery_cuda.cpp',
-        pointops_cuda_src + '/knnquery/knnquery_cuda_kernel.cu',
-        pointops_cuda_src + '/knnquery_heap/knnquery_heap_cuda.cpp',
-        pointops_cuda_src + '/knnquery_heap/knnquery_heap_cuda_kernel.cu',
-        pointops_cuda_src + '/grouping/grouping_cuda.cpp',
-        pointops_cuda_src + '/grouping/grouping_cuda_kernel.cu',
-        pointops_cuda_src + '/grouping_int/grouping_int_cuda.cpp',
-        pointops_cuda_src + '/grouping_int/grouping_int_cuda_kernel.cu',
-        pointops_cuda_src + '/interpolation/interpolation_cuda.cpp',
-        pointops_cuda_src + '/interpolation/interpolation_cuda_kernel.cu',
-        pointops_cuda_src + '/sampling/sampling_cuda.cpp',
-        pointops_cuda_src + '/sampling/sampling_cuda_kernel.cu',
-        pointops_cuda_src + '/labelstat/labelstat_cuda.cpp',
-        pointops_cuda_src + '/labelstat/labelstat_cuda_kernel.cu',
-        pointops_cuda_src + '/featuredistribute/featuredistribute_cuda.cpp',
-        pointops_cuda_src + '/featuredistribute/featuredistribute_cuda_kernel.cu'
-    ], build_directory=pointops_cuda_src, verbose=False)
+        _src + '/pointops_api.cpp',
+        _src + '/ballquery/ballquery_cuda.cpp',
+        _src + '/ballquery/ballquery_cuda_kernel.cu',
+        _src + '/knnquery/knnquery_cuda.cpp',
+        _src + '/knnquery/knnquery_cuda_kernel.cu',
+        _src + '/knnquery_heap/knnquery_heap_cuda.cpp',
+        _src + '/knnquery_heap/knnquery_heap_cuda_kernel.cu',
+        _src + '/grouping/grouping_cuda.cpp',
+        _src + '/grouping/grouping_cuda_kernel.cu',
+        _src + '/grouping_int/grouping_int_cuda.cpp',
+        _src + '/grouping_int/grouping_int_cuda_kernel.cu',
+        _src + '/interpolation/interpolation_cuda.cpp',
+        _src + '/interpolation/interpolation_cuda_kernel.cu',
+        _src + '/sampling/sampling_cuda.cpp',
+        _src + '/sampling/sampling_cuda_kernel.cu',
+        _src + '/labelstat/labelstat_cuda.cpp',
+        _src + '/labelstat/labelstat_cuda_kernel.cu',
+        _src + '/featuredistribute/featuredistribute_cuda.cpp',
+        _src + '/featuredistribute/featuredistribute_cuda_kernel.cu'
+    ], build_directory=_src, verbose=False)
 
 
 class FurthestSampling(Function):
