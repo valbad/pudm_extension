@@ -1,0 +1,20 @@
+# Core
+torch>=2.0
+numpy
+h5py
+einops
+
+# Visualization / Evaluation
+open3d
+
+# KNN for PointNet2 ops
+pytorch3d
+
+# Data augmentation
+transforms3d
+Pillow
+
+# Training utilities
+tensorboard
+termcolor
+tqdm

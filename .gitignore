@@ -1,0 +1,29 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.so
+*.o
+build/
+dist/
+*.egg
+.eggs/
+
+# CUDA build artifacts
+*.ninja
+*.ninja_deps
+*.ninja_log
+
+# Outputs & logs
+outputs/
+logs/
+*.pkl
+*.h5
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
