@@ -27,11 +27,16 @@ pudm_extension/
 
 ## Setup (Colab)
 
-Two ready-to-run Colab notebooks are provided:
+Two ready-to-run **Google Colab** notebooks are provided (T4 GPU or better):
 - `notebooks/pudm_ddpm.ipynb` — DDPM training & evaluation
 - `notebooks/pudm_flow_matching.ipynb` — Flow Matching training & evaluation
 
-Each notebook handles cloning, installation, CUDA compilation (with Drive caching), data prep, training (mixed precision), and evaluation end-to-end.
+Each notebook handles the full pipeline end-to-end:
+1. **Cloning & installation** — repo clone, pip install, ninja
+2. **CUDA extension compilation** — pointnet2_ops (JIT) and pointops (`build_ext`), with compiled `.so` files **cached on Google Drive** so recompilation is skipped on subsequent runs
+3. **Data preparation** — zip extraction to local disk, Drive-cached for fast restore across sessions
+4. **Training** — mixed precision (fp16 via AMP), checkpoints saved to Drive
+5. **Evaluation** — Chamfer Distance, Hausdorff Distance, P2F metrics
 
 ### Manual Setup
 
