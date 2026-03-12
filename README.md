@@ -8,7 +8,9 @@ A clean, modular reimplementation of [PUDM](https://arxiv.org/abs/2404.06868) (C
 pudm_extension/
 ├── configs/              # Experiment configs (PU1K.json, PUGAN.json)
 ├── compile_ops.sh        # Build CUDA extensions
-├── notebooks/            # Colab notebooks
+├── notebooks/            # Colab notebooks (one per strategy)
+│   ├── pudm_ddpm.ipynb
+│   └── pudm_flow_matching.ipynb
 ├── src/
 │   ├── data/             # Datasets (PU1K, PUGAN) and augmentation
 │   ├── generative/       # Strategy pattern: DDPM, Flow Matching
@@ -25,14 +27,19 @@ pudm_extension/
 
 ## Setup (Colab)
 
+Two ready-to-run Colab notebooks are provided:
+- `notebooks/pudm_ddpm.ipynb` — DDPM training & evaluation
+- `notebooks/pudm_flow_matching.ipynb` — Flow Matching training & evaluation
+
+Each notebook handles cloning, installation, CUDA compilation (with Drive caching), data prep, training (mixed precision), and evaluation end-to-end.
+
+### Manual Setup
+
 ```bash
 # 1. Install Python dependencies
-pip install -r requirements.txt
+pip install -r requirements.txt ninja
 
-# 2. Install pytorch3d (Colab)
-pip install "git+https://github.com/facebookresearch/pytorch3d.git"
-
-# 3. Compile CUDA extensions
+# 2. Compile CUDA extensions
 bash compile_ops.sh
 ```
 
