@@ -57,8 +57,8 @@ class FurthestSampling(Function):
         """
         assert xyz.is_contiguous()
         b, n, _ = xyz.size()
-        idx = torch.cuda.IntTensor(b, m)
-        temp = torch.cuda.FloatTensor(b, n).fill_(1e10)
+        idx = torch.empty(b, m, dtype=torch.int32, device="cuda")
+        temp = torch.full((b, n), 1e10, dtype=torch.float32, device="cuda")
         pointops_cuda.furthestsampling_cuda(b, n, m, xyz, temp, idx)
         return idx
 
@@ -80,7 +80,7 @@ class Gathering(Function):
         assert idx.is_contiguous()
         b, c, n = features.size()
         m = idx.size(1)
-        output = torch.cuda.FloatTensor(b, c, m)
+        output = torch.empty(b, c, m, dtype=torch.float32, device="cuda")
         pointops_cuda.gathering_forward_cuda(b, c, n, m, features, idx, output)
         ctx.for_backwards = (idx, c, n)
         return output
@@ -89,7 +89,7 @@ class Gathering(Function):
     def backward(ctx, grad_out):
         idx, c, n = ctx.for_backwards
         b, m = idx.size()
-        grad_features = torch.cuda.FloatTensor(b, c, n).zero_()
+        grad_features = torch.zeros(b, c, n, dtype=torch.float32, device="cuda")
         grad_out_data = grad_out.data.contiguous()
         pointops_cuda.gathering_backward_cuda(b, c, n, m, grad_out_data, idx, grad_features.data)
         return grad_features, None
@@ -110,8 +110,8 @@ class NearestNeighbor(Function):
         assert known.is_contiguous()
         b, n, _ = unknown.size()
         m = known.size(1)
-        dist2 = torch.cuda.FloatTensor(b, n, 3)
-        idx = torch.cuda.IntTensor(b, n, 3)
+        dist2 = torch.empty(b, n, 3, dtype=torch.float32, device="cuda")
+        idx = torch.empty(b, n, 3, dtype=torch.int32, device="cuda")
         pointops_cuda.nearestneighbor_cuda(b, n, m, unknown, known, dist2, idx)
         return torch.sqrt(dist2), idx
 
@@ -139,7 +139,7 @@ class Interpolation(Function):
         b, c, m = features.size()
         n = idx.size(1)
         ctx.interpolation_for_backward = (idx, weight, m)
-        output = torch.cuda.FloatTensor(b, c, n)
+        output = torch.empty(b, c, n, dtype=torch.float32, device="cuda")
         pointops_cuda.interpolation_forward_cuda(b, c, m, n, features, idx, weight, output)
         return output
 
@@ -151,7 +151,7 @@ class Interpolation(Function):
         """
         idx, weight, m = ctx.interpolation_for_backward
         b, c, n = grad_out.size()
-        grad_features = torch.cuda.FloatTensor(b, c, m).zero_()
+        grad_features = torch.zeros(b, c, m, dtype=torch.float32, device="cuda")
         grad_out_data = grad_out.data.contiguous()
         pointops_cuda.interpolation_backward_cuda(b, c, n, m, grad_out_data, idx, weight, grad_features.data)
         return grad_features, None, None
@@ -170,7 +170,7 @@ class Grouping(Function):
         assert idx.is_contiguous()
         b, c, n = features.size()
         _, m, nsample = idx.size()
-        output = torch.cuda.FloatTensor(b, c, m, nsample)
+        output = torch.empty(b, c, m, nsample, dtype=torch.float32, device="cuda")
         pointops_cuda.grouping_forward_cuda(b, c, n, m, nsample, features, idx, output)
         ctx.for_backwards = (idx, n)
         return output
@@ -183,7 +183,7 @@ class Grouping(Function):
         """
         idx, n = ctx.for_backwards
         b, c, m, nsample = grad_out.size()
-        grad_features = torch.cuda.FloatTensor(b, c, n).zero_()
+        grad_features = torch.zeros(b, c, n, dtype=torch.float32, device="cuda")
         grad_out_data = grad_out.data.contiguous()
         pointops_cuda.grouping_backward_cuda(b, c, n, m, nsample, grad_out_data, idx, grad_features.data)
         return grad_features, None
@@ -202,7 +202,7 @@ class GroupingInt(Function):
         assert idx.is_contiguous()
         b, c, n = features.size()
         _, m, nsample = idx.size()
-        output = torch.cuda.LongTensor(b, c, m, nsample)
+        output = torch.empty(b, c, m, nsample, dtype=torch.long, device="cuda")
         pointops_cuda.grouping_int_forward_cuda(b, c, n, m, nsample, features, idx, output)
         return output
 
@@ -227,7 +227,7 @@ class BallQuery(Function):
         assert new_xyz.is_contiguous()
         b, n, _ = xyz.size()
         m = new_xyz.size(1)
-        idx = torch.cuda.IntTensor(b, m, nsample).zero_()
+        idx = torch.zeros(b, m, nsample, dtype=torch.int32, device="cuda")
         pointops_cuda.ballquery_cuda(b, n, m, radius, nsample, new_xyz, xyz, idx)
         return idx
 
@@ -251,7 +251,7 @@ class FeatureDistribute(Function):
         assert xyz.is_contiguous()
         b, n, _ = max_xyz.size()
         m = xyz.size(1)
-        distribute_idx = torch.cuda.IntTensor(b, m).zero_()
+        distribute_idx = torch.zeros(b, m, dtype=torch.int32, device="cuda")
         pointops_cuda.featuredistribute_cuda(b, n, m, max_xyz, xyz, distribute_idx)
         return distribute_idx
 
@@ -275,7 +275,7 @@ class FeatureGather(Function):
         assert distribute_idx.is_contiguous()
         b, c, n = max_feature.size()
         m = distribute_idx.size(1)
-        distribute_feature = torch.cuda.FloatTensor(b, c, m).zero_()
+        distribute_feature = torch.zeros(b, c, m, dtype=torch.float32, device="cuda")
         pointops_cuda.featuregather_forward_cuda(b, n, m, c, max_feature, distribute_idx, distribute_feature)
         ctx.for_backwards = (distribute_idx, n)
         return distribute_feature
@@ -289,7 +289,7 @@ class FeatureGather(Function):
         '''
         distribute_idx, n = ctx.for_backwards
         b, c, m = grad_distribute_feature.size()
-        grad_max_feature = torch.cuda.FloatTensor(b, c, n).zero_()
+        grad_max_feature = torch.zeros(b, c, n, dtype=torch.float32, device="cuda")
         grad_distribute_feature_data = grad_distribute_feature.data.contiguous()
         pointops_cuda.featuregather_backward_cuda(b, n, m, c, grad_distribute_feature_data, distribute_idx, grad_max_feature.data)
         return grad_max_feature, None
@@ -314,7 +314,7 @@ class LabelStatBallRange(Function):
 
         b, n, nclass = label_stat.size()
         m = new_xyz.size(1)
-        new_label_stat = torch.cuda.IntTensor(b, m, nclass).zero_()
+        new_label_stat = torch.zeros(b, m, nclass, dtype=torch.int32, device="cuda")
         pointops_cuda.labelstat_ballrange_cuda(b, n, m, radius, nclass, new_xyz, xyz, label_stat, new_label_stat)
 
         return new_label_stat
@@ -341,7 +341,7 @@ class LabelStatIdx(Function):
 
         b, n, nclass = label_stat.size()
         m = idx.size(1)
-        new_label_stat = torch.cuda.IntTensor(b, m, nclass).zero_()
+        new_label_stat = torch.zeros(b, m, nclass, dtype=torch.int32, device="cuda")
         pointops_cuda.labelstat_idx_cuda(b, n, m, nsample, nclass, label_stat, idx, new_label_stat)
 
         return new_label_stat
@@ -371,8 +371,8 @@ class LabelStatAndBallQuery(Function):
 
         b, n, nclass = label_stat.size()
         m = new_xyz.size(1)
-        new_label_stat = torch.cuda.IntTensor(b, m, nclass).zero_()
-        idx = torch.cuda.IntTensor(b, m, nsample).zero_()
+        new_label_stat = torch.zeros(b, m, nclass, dtype=torch.int32, device="cuda")
+        idx = torch.zeros(b, m, nsample, dtype=torch.int32, device="cuda")
 
         pointops_cuda.labelstat_and_ballquery_cuda(b, n, m, radius, nsample, nclass, new_xyz, xyz, label_stat, idx, new_label_stat)
 
@@ -464,8 +464,8 @@ class KNNQuery(Function):
         assert new_xyz.is_contiguous()
         b, m, _ = new_xyz.size()
         n = xyz.size(1)
-        idx = torch.cuda.IntTensor(b, m, nsample).zero_()
-        dist2 = torch.cuda.FloatTensor(b, m, nsample).zero_()
+        idx = torch.zeros(b, m, nsample, dtype=torch.int32, device="cuda")
+        dist2 = torch.zeros(b, m, nsample, dtype=torch.float32, device="cuda")
         pointops_cuda.knnquery_cuda(b, n, m, nsample, xyz, new_xyz, idx, dist2)
         return idx
 
@@ -493,8 +493,8 @@ class KNNQuery_Heap(Function):
         assert new_xyz.is_contiguous()
         b, m, _ = new_xyz.size()
         n = xyz.size(1)
-        idx = torch.cuda.IntTensor(b, m, nsample).zero_()
-        dist2 = torch.cuda.FloatTensor(b, m, nsample).zero_()
+        idx = torch.zeros(b, m, nsample, dtype=torch.int32, device="cuda")
+        dist2 = torch.zeros(b, m, nsample, dtype=torch.float32, device="cuda")
         pointops_cuda.knnquery_heap_cuda(b, n, m, nsample, xyz, new_xyz, idx, dist2)
         ctx.mark_non_differentiable(idx)
         return idx
