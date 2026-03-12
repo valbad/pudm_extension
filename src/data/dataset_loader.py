@@ -21,10 +21,15 @@ class PU1K(data.Dataset):
             augmentation=False,
             return_augmentation_params=False,
             R=8,
+            max_train_samples=None,
     ):
         self.return_augmentation_params = return_augmentation_params
         if train:
             self.input_data,self.gt_data = load_h5_data(os.path.join(data_dir,"train","pu1k_poisson_256_poisson_1024_pc_2500_patch50_addpugan.h5"))
+            if max_train_samples and max_train_samples < len(self.input_data):
+                idx = np.random.permutation(len(self.input_data))[:max_train_samples]
+                self.input_data = self.input_data[idx]
+                self.gt_data = self.gt_data[idx]
         else:
             self.input_path = f"{data_dir}/test/input_{npoints}_{R}X/input_{npoints}"
             self.gt_path = f"{data_dir}/test/input_{npoints}_{R}X/gt_{npoints*R}"
@@ -121,10 +126,15 @@ class PUGAN(data.Dataset):
             augmentation=False,
             return_augmentation_params=False,
             R=8,
+            max_train_samples=None,
     ):
         self.return_augmentation_params = return_augmentation_params
         if train:
             self.input_data,self.gt_data = load_h5_data(os.path.join(data_dir,"train","PUGAN_poisson_256_poisson_1024.h5"))
+            if max_train_samples and max_train_samples < len(self.input_data):
+                idx = np.random.permutation(len(self.input_data))[:max_train_samples]
+                self.input_data = self.input_data[idx]
+                self.gt_data = self.gt_data[idx]
         else:
             self.input_path = f"{data_dir}/test/input_{npoints}_{R}X/input_{npoints}"
             self.gt_path = f"{data_dir}/test/input_{npoints}_{R}X/gt_{npoints*R}"

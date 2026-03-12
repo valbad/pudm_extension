@@ -103,6 +103,7 @@
         "batch_size": 28,
         "eval_batch_size": 28,
         "num_workers": 4,
+        "max_train_samples": 10000,
         "num_samples_tested": 1600,
         "test_trainset_during_eval": true,
         "include_generated_samples": false,

@@ -25,6 +25,8 @@ def get_dataloader(
     if args.get('augment_data_during_generation', False):
         augmentation = args.get('augmentation', False)
 
+    max_train_samples = args.get('max_train_samples', None)
+
     if args['dataset'] == 'PU1K':
         dataset = PU1K(
             args['data_dir'],
@@ -33,7 +35,8 @@ def get_dataloader(
             npoints=args['npoints'],
             augmentation=augmentation,
             return_augmentation_params=return_augmentation_params,
-            R=args["R"]
+            R=args["R"],
+            max_train_samples=max_train_samples if train else None,
         )
         trainloader = torch.utils.data.DataLoader(
             dataset,
@@ -49,7 +52,8 @@ def get_dataloader(
             npoints=args['npoints'],
             augmentation=augmentation,
             return_augmentation_params=return_augmentation_params,
-            R=args["R"]
+            R=args["R"],
+            max_train_samples=max_train_samples if train else None,
         )
         trainloader = torch.utils.data.DataLoader(
             dataset,
