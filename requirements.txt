@@ -15,3 +15,6 @@ Pillow
 tensorboard
 termcolor
 tqdm
+
+# Build
+ninja

@@ -32,7 +32,7 @@ Two ready-to-run **Google Colab** notebooks are provided (T4 GPU or better):
 - `notebooks/pudm_flow_matching.ipynb` — Flow Matching training & evaluation
 
 Each notebook handles the full pipeline end-to-end:
-1. **Cloning & installation** — repo clone, pip install, ninja
+1. **Cloning & installation** — repo clone, pip install
 2. **CUDA extension compilation** — pointnet2_ops (JIT) and pointops (`build_ext`), with compiled `.so` files **cached on Google Drive** so recompilation is skipped on subsequent runs
 3. **Data preparation** — zip extraction to local disk, Drive-cached for fast restore across sessions
 4. **Training** — mixed precision (fp16 via AMP), checkpoints saved to Drive
@@ -42,7 +42,7 @@ Each notebook handles the full pipeline end-to-end:
 
 ```bash
 # 1. Install Python dependencies
-pip install -r requirements.txt ninja
+pip install -r requirements.txt
 
 # 2. Compile CUDA extensions
 bash compile_ops.sh
