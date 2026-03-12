@@ -19,6 +19,11 @@ logs/
 *.pkl
 *.h5
 
+# Local directories (populated on Colab, not tracked)
+cache/
+data/
+notes/
+
 # IDE
 .vscode/
 .idea/
