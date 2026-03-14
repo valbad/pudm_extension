@@ -12,6 +12,7 @@ import time
 from src.models.pointnet2_with_pcld_condition import PointNet2CloudCondition
 from src.generative import get_strategy
 from src.generative.ddpm import DDPMStrategy
+from src.generative.flow_matching import FlowMatchingStrategy
 from src.utils.config import load_config, print_config, get_strategy_config
 from src.utils.misc import set_seed
 from src.utils.pc_utils import pc_normalize, numpy_to_pc
@@ -60,7 +61,7 @@ def evaluate_example(
         )
     else:
         sample_kwargs = {}
-        if strategy.name == 'FlowMatching':
+        if isinstance(strategy, FlowMatchingStrategy):
             sample_kwargs['num_steps'] = step
         generated, condition_pre, z = strategy.sample(
             net=net,

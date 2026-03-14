@@ -1,4 +1,5 @@
 """JSON config reading utilities."""
+import ast
 import json
 import copy
 
@@ -18,10 +19,10 @@ def restore_string_to_list_in_a_dict(dictionary):
     for key in dictionary.keys():
         if isinstance(dictionary[key], str):
             try:
-                evaluated = eval(dictionary[key])
+                evaluated = ast.literal_eval(dictionary[key])
                 if isinstance(evaluated, list):
                     dictionary[key] = evaluated
-            except:
+            except (ValueError, SyntaxError):
                 pass
         if isinstance(dictionary[key], dict):
             dictionary[key] = restore_string_to_list_in_a_dict(dictionary[key])

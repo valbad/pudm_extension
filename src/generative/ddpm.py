@@ -117,6 +117,7 @@ class DDPMStrategy(GenerativeStrategy):
         # Hierarchical midpoint interpolation
         i = get_interpolate(condition, R)
 
+        condition_pre = None
         with torch.no_grad():
             for t in range(T - 1, -1, -1):
                 if t % print_every_n_steps == 0:
@@ -181,6 +182,7 @@ class DDPMStrategy(GenerativeStrategy):
 
         i = get_interpolate(condition, R)
 
+        condition_pre = None
         with torch.no_grad():
             for s, t in zip(steps, ts):
                 if (s + 1) % print_every_n_steps == 0 or s == 0:

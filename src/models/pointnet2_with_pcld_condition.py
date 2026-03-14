@@ -618,7 +618,7 @@ class PointNet2CloudCondition(PointNet2SemSegSSG):
         out_feature = l_features[0]
         out_feature = torch.cat([out_feature.transpose(1,2), i_pc, xyz], dim=-1).permute(0,2,1)
         out = self.fc_layer_noise(out_feature).permute(0,2,1)
-        if (self.train): out = self.hparams['gamma'] * (out + i_pc)
+        out = self.hparams['gamma'] * (out + i_pc)
         if(self.include_local_feature and self.condition_loss):
             condition_feature = l_cond_features[0]
             condition_feature = torch.cat([condition_feature.transpose(1,2), uvw], dim=-1).permute(0,2,1)

@@ -32,13 +32,14 @@ class FlowMatchingStrategy(GenerativeStrategy):
     def name(self) -> str:
         return "FlowMatching"
 
-    def compute_hyperparams(self, T=1000, **kwargs) -> dict:
+    def compute_hyperparams(self, T=1000, num_steps=100, **kwargs) -> dict:
         """Flow Matching has minimal hyperparameters.
 
         T is used only for rescaling the continuous time to match
         the network's timestep embedding range.
+        num_steps is the default number of Euler integration steps at inference.
         """
-        return {"T": T}
+        return {"T": T, "num_steps": num_steps}
 
     def training_loss(
         self,

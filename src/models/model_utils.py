@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 # Positional encoding (section 5.1)
 class Embedder:
     def __init__(self, **kwargs):
@@ -53,5 +54,4 @@ def get_embedder(multires, i=0):
 if __name__ == '__main__':
     multires = 10
     embed, out_dim = get_embedder(multires)
-    pdb.set_trace()
-    # print(0)
+    print(out_dim)

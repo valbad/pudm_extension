@@ -10,6 +10,7 @@ import shutil
 import time
 
 from src.generative.ddpm import DDPMStrategy
+from src.generative.flow_matching import FlowMatchingStrategy
 from src.metrics.chamfer3d import chamfer_3DDist, hausdorff_distance
 from src.utils.misc import AverageMeter
 from src.utils.pc_utils import numpy_to_pc
@@ -86,7 +87,7 @@ def evaluate(
             )
         else:
             sample_kwargs = {}
-            if hasattr(strategy, 'name') and strategy.name == 'FlowMatching':
+            if isinstance(strategy, FlowMatchingStrategy):
                 sample_kwargs['num_steps'] = step
             generated_data, condition_pre, z = strategy.sample(
                 net=net,
