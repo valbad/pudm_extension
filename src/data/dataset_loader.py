@@ -31,8 +31,8 @@ class PU1K(data.Dataset):
                 self.input_data = self.input_data[idx]
                 self.gt_data = self.gt_data[idx]
         else:
-            self.input_path = f"{data_dir}/test/input_{npoints}_{R}X/input_{npoints}"
-            self.gt_path = f"{data_dir}/test/input_{npoints}_{R}X/gt_{npoints*R}"
+            self.input_path = f"{data_dir}/test/input_{npoints}/input_{npoints}"
+            self.gt_path = f"{data_dir}/test/input_{npoints}/gt_{npoints*R}"
 
             # ---- condition ----
             plys = glob.glob(os.path.join(self.input_path, "*.xyz"))
@@ -136,8 +136,8 @@ class PUGAN(data.Dataset):
                 self.input_data = self.input_data[idx]
                 self.gt_data = self.gt_data[idx]
         else:
-            self.input_path = f"{data_dir}/test/input_{npoints}_{R}X/input_{npoints}"
-            self.gt_path = f"{data_dir}/test/input_{npoints}_{R}X/gt_{npoints*R}"
+            self.input_path = f"{data_dir}/test/input_{npoints}/input_{npoints}"
+            self.gt_path = f"{data_dir}/test/input_{npoints}/gt_{npoints*R}"
 
             # ---- condition ----
             plys = glob.glob(os.path.join(self.input_path, "*.xyz"))
