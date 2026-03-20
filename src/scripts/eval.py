@@ -110,9 +110,15 @@ def evaluate(
         torch.cuda.empty_cache()
 
         if compute_cd:
-            cd_p, dist, _, _ = cd_module(generated_data, gt)
-            dist = (cd_p + dist) / 2.0
-            cd_loss = dist.mean().detach().cpu().item()
+            dist1_sq, dist2_sq, _, _ = cd_module(generated_data, gt)
+            # dist1_sq/dist2_sq are squared L2 distances; take sqrt for actual L2
+            dist1 = torch.sqrt(dist1_sq)  # (B, N_generated)
+            dist2 = torch.sqrt(dist2_sq)  # (B, N_gt)
+            # symmetric CD: mean over points in each direction, then average
+            cd_per_sample = (dist1.mean(dim=1) + dist2.mean(dim=1)) / 2.0  # (B,)
+            cd_loss = cd_per_sample.mean().detach().cpu().item()
+            dist = cd_per_sample  # used for metrics accumulation below
+            cd_p = dist1.mean(dim=1)  # one-directional, for cd_result
         else:
             dist = torch.zeros(generated_data.shape[0], device=generated_data.device)
             cd_p = dist
@@ -121,6 +127,7 @@ def evaluate(
         cd_result += torch.sum(cd_p).item()
 
         hd_cost = hausdorff_distance(generated_data, gt)
+        # hd_cost is now shape (B,) — max of both directions per sample
         hd_loss = hd_cost.mean().detach().cpu().item()
 
         p2f_loss = 0

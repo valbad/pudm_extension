@@ -87,9 +87,10 @@ def hausdorff_distance(X,Y):
     '''
     B,N,C = X.shape
     dist1, dist2 ,_ ,_ = chamfer_3DFunction.apply(X, Y)
-    h1 = torch.amax(dist1, dim=1).view(B,1)
-    h2 = torch.amax(dist2, dim=1).view(B,1)
-    hd_loss = torch.cat([h1,h2],dim=-1)
+    # dist1/dist2 are squared L2 distances; take sqrt for actual L2
+    h1 = torch.amax(torch.sqrt(dist1), dim=1)  # (B,)
+    h2 = torch.amax(torch.sqrt(dist2), dim=1)  # (B,)
+    hd_loss = torch.maximum(h1, h2)  # true Hausdorff: max of both directions
     return hd_loss
 
 
